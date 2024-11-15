@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Контроль вивчення іноземної мови</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-image: url(background6.jpg);
+            background-size: cover;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #ffffff46;
+            border-radius: 10px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .game-info p {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .word-card-wrapper {
+            width: 100%;
+            height: 180px;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+        }
+
+        .word-card {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        #user-input {
+            margin-top: 20px;
+            padding: 10px;
+            width: 100%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px;
+            width: 100%;
+            background-color: #a744b0;
+            color: #ffffff;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #a744b0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 43%;
+            left: 50%;
+            transform: translate(-50%, -20%);
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+        }
+        #close-modal {
+            margin-top: 10px;
+            background-color: #4CAF50;
+            padding: 10px 20px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #close-modal:hover {
+            background-color: #8739d5;
+        }
+
+        .error-message {
+            color: #f44336;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Контроль вивчення іноземної мови</h1>
+        <div class="game-info">
+            <p>Крок: <span id="current-step">1</span> з <span id="total-steps">10</span></p>
+            <p class="score-board">
+                Правильних відповідей: <span id="correct-count">0</span> | Неправильних відповідей: <span id="incorrect-count">0</span>
+            </p>
+        </div>
+        <div class="word-card-wrapper">
+            <div id="word-card" class="word-card"></div>
+        </div>
+        <input type="text" id="user-input" placeholder="Введіть переклад">
+        <button id="restart-game">Рестарт</button>
+        <button id="check-answer">Перевірити</button>
+        <div id="error-message" class="error-message"></div>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2>Ваш рівень знань: <span id="knowledge-level"></span></h2>
+            <button id="close-modal">Закрити</button>
+        </div>
+    </div>
+    
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let words = {
+                'cabbage': 'капуста',
+                'world': 'світ',
+                'steering wheel': 'кермо',
+                'language': 'мова',
+                'hump': 'горб',
+                'bunny': 'зайчик',
+                'car': 'автомобіль',
+                'sloth': 'лінивець',
+                'friend': 'друг',
+                'clever': 'розумний'
+            };
+
+            let currentStep = 1;
+            let correctAnswers = 0;
+            let incorrectAnswers = 0;
+            const totalSteps = 10;
+
+            const wordCard = document.getElementById('word-card');
+            const userInput = document.getElementById('user-input');
+            const currentStepEl = document.getElementById('current-step');
+            const correctCountEl = document.getElementById('correct-count');
+            const incorrectCountEl = document.getElementById('incorrect-count');
+            const errorMessage = document.getElementById('error-message');
+            const modal = document.getElementById('modal');
+            const knowledgeLevel = document.getElementById('knowledge-level');
+
+            function getRandomWord() {
+                const wordKeys = Object.keys(words);
+                const randomWord = wordKeys[Math.floor(Math.random() * wordKeys.length)];
+                wordCard.textContent = randomWord;
+                userInput.value = '';
+                errorMessage.textContent = '';
+            }
+
+            function showFinalLevel() {
+                const percentage = (correctAnswers / totalSteps) * 100;
+                if (percentage >= 70) {
+                    knowledgeLevel.textContent = 'Високий';
+                } else if (percentage >= 40) {
+                    knowledgeLevel.textContent = 'Середній';
+                } else {
+                    knowledgeLevel.textContent = 'Низький';
+                }
+                modal.style.display = 'flex';
+            }
+            function restartGame() {
+                currentStep = 1;
+                correctAnswers = 0;
+                incorrectAnswers = 0;
+                currentStepEl.textContent = currentStep;
+                correctCountEl.textContent = correctAnswers;
+                incorrectCountEl.textContent = incorrectAnswers;
+                modal.style.display = 'none';
+                getRandomWord();
+            }
+
+            document.getElementById('check-answer').addEventListener('click', function () {
+                const userAnswer = userInput.value.trim().toLowerCase();
+                const correctAnswer = words[wordCard.textContent.toLowerCase()];
+
+                if (!userAnswer) {
+                    errorMessage.textContent = 'Будь ласка, введіть слово!';
+                    return;
+                }
+
+                if (userAnswer === correctAnswer) {
+                    correctAnswers++;
+                    correctCountEl.textContent = correctAnswers;
+                } else {
+                    incorrectAnswers++;
+                    incorrectCountEl.textContent = incorrectAnswers;
+                }
+
+                currentStep++;
+                if (currentStep > totalSteps) {
+                    showFinalLevel();
+                } else {
+                    currentStepEl.textContent = currentStep;
+                    getRandomWord();
+                }
+            });
+
+            document.getElementById('close-modal').addEventListener('click', function () {
+                modal.style.display = 'none';
+            });
+
+            document.getElementById('restart-game').addEventListener('click', restartGame);
+
+            getRandomWord();
+        });
+    </script>
+</body>
+</html>
